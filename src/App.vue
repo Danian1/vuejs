@@ -2,66 +2,90 @@
   <div id="app">
     <h1>{{ msg }}</h1>
     <hr/>
-    <div class="col-4 input-group text-center">
-      <div class="input-group-prepend">
-        <span class="input-group-text">Name</span>
-      </div>
-      <input type="text" class="form-control" v-model="name">
-      <button @click="submitName()" type="button" class="btn btn-info">Add</button>
+    <div class="col-12 input-group text-center">
+      <input type="text" class="form-control" v-model="fname" placeholder="First name">
+      <input type="text" class="form-control" v-model="lname" placeholder="Last name">
+      <input type="number" class="form-control" min="18" max="50" v-model="age" value="0" placeholder="Age">
+      <button @click="submitPerson()" type="button" class="btn btn-info">Add</button>
     </div>
-    <div class="col-3">
-      <ul>
-        <li v-for="personName of names" v-bind:key="personName['.key']">
-          <div v-if="!personName.edit">
-              <p>{{ personName.name }}</p>
-              <button @click="removeName(personName['.key'])" class="btn btn-danger">Remove</button>
-              <button @click="setEditName(personName['.key'])" class="btn btn-success">Edit</button>
-          </div>
-          <div v-else>
-             <input type="text" class="form-control" v-model="personName.name">
-             <button @click="saveEdit(personName)" class="btn btn-success">Save</button>
-             <button @click="cancelEdit(personName['.key'])" class="btn btn-danger">Cancel</button>
-          </div>
-          </li>
-      </ul>
+    <br>
+
+    <div>
+      <table class="table">
+        <thead class="thead-inverse">
+          <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Age</th>
+            <th>#</th>
+            <th>#</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="personInfo of person" v-bind:key="personInfo['.key']" v-if="!personInfo.edit">
+              <td>{{ personInfo.fname }}</td>
+              <td>{{ personInfo.lname }}</td>
+              <td>{{ personInfo.age }}</td>
+              <td><button @click="setEditPerson(personInfo['.key'])" class="btn btn-success">Edit</button></td>
+              <td><button @click="removePerson(personInfo['.key'])" class="btn btn-danger">Remove</button></td>
+          </tr>
+          <tr v-else>
+            <td><input type="text" class="form-control" v-model="personInfo.fname"></td>
+            <td><input type="text" class="form-control" v-model="personInfo.lname"></td>
+            <td><input type="text" class="form-control" v-model="personInfo.age"></td>
+            <td><button @click="saveEdit(personInfo)" class="btn btn-success">Save</button></td>
+            <td><button @click="cancelEdit(personInfo['.key'])" class="btn btn-danger">Cancel</button></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+
   </div>
 </template>
 
 <script>
-import { namesRef } from './firebase';
+import { personRef } from './firebase';
+
 export default {
   name: 'app',
   data () {
     return {
-      msg: 'Welcome to my Application, with i use VueJs and Firebase',
-      name:''
+      msg: 'Welcome to my Application, with i use VueFire',
+      fname: '',
+      lname: '',
+      age: ''
     }
   },
   firebase:{
-      names:namesRef
+     person: personRef
   },
   methods:{
-    submitName(){
-        namesRef.push({
-          name:this.name,
+    submitPerson(){
+      personRef.push({
+          fname:this.fname,
+          lname:this.lname,
+          age:this.age,
           edit:false
         })
-        this.name = '';
+        this.fname = '';
+        this.lname = '';
+        this.age = '';
     },
-    removeName(key){
-        namesRef.child(key).remove();
+    setEditPerson(key){
+      personRef.child(key).update({ edit:true });
     },
-    setEditName(key){
-        namesRef.child(key).update({ edit:true });
+    removePerson(key){
+      personRef.child(key).remove();
     },
     cancelEdit(key){
-        namesRef.child(key).update({ edit:false });
+      personRef.child(key).update({ edit:false });
     },
     saveEdit(person){
         const key = person['.key'];
-        namesRef.child(key).set({ 
-          name: person.name,
+        personRef.child(key).set({ 
+          lname: person.lname,
+          fname: person.fname,
+          age: person.age,
           edit:false
           });
     }
